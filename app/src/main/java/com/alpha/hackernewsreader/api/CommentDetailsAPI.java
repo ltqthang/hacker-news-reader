@@ -1,6 +1,6 @@
 package com.alpha.hackernewsreader.api;
 
-import com.alpha.hackernewsreader.model.ItemDetails;
+import com.alpha.hackernewsreader.model.Comment;
 import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
@@ -9,7 +9,7 @@ import retrofit2.http.Path;
  * @author Thang
  * @since 25/4/17 21:09
  */
-public interface ItemDetailsAPI {
+public interface CommentDetailsAPI {
     @GET("item/{itemId}.json")
-    Observable<ItemDetails> getItemDetails(@Path("itemId") Long itemId);
+    Observable<Comment> getCommentDetails(@Path("itemId") int itemId);
 }

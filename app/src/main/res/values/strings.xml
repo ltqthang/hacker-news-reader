@@ -3,4 +3,6 @@
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="fetch_comment_list_error">Cannot fetch comment list!</string>
+    <string name="fetch_story_list_error">Cannot fetch story list!</string>
 </resources>

@@ -1,9 +1,9 @@
 package com.alpha.hackernewsreader.list;
 
-import android.util.Log;
-import com.alpha.hackernewsreader.api.ItemDetailsAPI;
+import com.alpha.hackernewsreader.api.StoryDetailsAPI;
 import com.alpha.hackernewsreader.api.TopStoriesAPI;
-import com.alpha.hackernewsreader.model.ItemDetails;
+import com.alpha.hackernewsreader.model.Story;
+import com.alpha.hackernewsreader.utils.Logger;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -18,24 +18,30 @@ import javax.inject.Inject;
  * @author Thang
  * @since 25/4/17 21:20
  */
-public class NewsListPresenter {
-    private NewsListView mNewsListView;
+public class StoryListPresenter {
+    private static final int LIMIT = 10;
+
+    private StoryListView mStoryListView;
     private TopStoriesAPI mTopStoriesAPI;
-    private ItemDetailsAPI mItemDetailsAPI;
+    private StoryDetailsAPI mStoryDetailsAPI;
 
     private Disposable subscribe;
 
     @Inject
-    public NewsListPresenter(TopStoriesAPI topStoriesAPI, ItemDetailsAPI itemDetailsAPI) {
+    StoryListPresenter(TopStoriesAPI topStoriesAPI, StoryDetailsAPI storyDetailsAPI) {
         mTopStoriesAPI = topStoriesAPI;
-        mItemDetailsAPI = itemDetailsAPI;
+        mStoryDetailsAPI = storyDetailsAPI;
     }
 
-    public void setNewsListView(NewsListView newsListView) {
-        mNewsListView = newsListView;
+    void setStoryListView(StoryListView storyListView) {
+        mStoryListView = storyListView;
     }
 
-    public void fetchTopStories() {
+    public void fetchTopStories(boolean isRefreshing) {
+        if (!isRefreshing) {
+            mStoryListView.onLoading();
+        }
+
         subscribe = mTopStoriesAPI.getTopStories()
                 .flatMap(new Function<List<Long>, ObservableSource<Long>>() {
                     @Override
@@ -43,30 +49,31 @@ public class NewsListPresenter {
                         return Observable.fromIterable(ids);
                     }
                 })
-                .take(10)
-                .concatMap(new Function<Long, ObservableSource<ItemDetails>>() {
+                .take(LIMIT)
+                .concatMap(new Function<Long, ObservableSource<Story>>() {
                     @Override
-                    public ObservableSource<ItemDetails> apply(Long id) throws Exception {
-                        return mItemDetailsAPI.getItemDetails(id);
+                    public ObservableSource<Story> apply(Long id) throws Exception {
+                        return mStoryDetailsAPI.getStoryDetails(id);
                     }
                 })
                 .toList()
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Consumer<List<ItemDetails>>() {
+                .subscribe(new Consumer<List<Story>>() {
                     @Override
-                    public void accept(List<ItemDetails> itemDetails) throws Exception {
-                        Log.d("TAG", "" + itemDetails.size());
+                    public void accept(List<Story> itemDetails) throws Exception {
+                        mStoryListView.onStoryListFetched(itemDetails);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
-                        throwable.printStackTrace();
+                        Logger.log(throwable);
+                        mStoryListView.onError();
                     }
                 });
     }
 
-    public void destroy() {
+    void destroy() {
         subscribe.dispose();
     }
 }
