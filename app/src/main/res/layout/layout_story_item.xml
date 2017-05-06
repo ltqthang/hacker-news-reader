@@ -32,6 +32,7 @@
                 android:layout_height="wrap_content"
                 android:text="@{story.title}"
                 android:textSize="16sp"
+                android:textColor="@color/black"
                 tools:text="Story title goes here" />
 
             <TextView

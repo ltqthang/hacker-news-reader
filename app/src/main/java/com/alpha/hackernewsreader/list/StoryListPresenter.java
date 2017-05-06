@@ -43,7 +43,7 @@ public class StoryListPresenter {
         }
 
         subscribe = mTopStoriesAPI.getTopStories()
-                .flatMap(new Function<List<Long>, ObservableSource<Long>>() {
+                .concatMap(new Function<List<Long>, ObservableSource<Long>>() {
                     @Override
                     public ObservableSource<Long> apply(List<Long> ids) throws Exception {
                         return Observable.fromIterable(ids);
